@@ -18,8 +18,18 @@ return new class extends Migration
             $table->id();
             $table->enum('status', FollowUpStatus::values());
             $table->unsignedInteger('order_column');
-            $table->foreignIdFor(User::class, 'broker_id');
-            $table->foreignIdFor(Lead::class);
+
+            $table->string('name', 100);
+            $table->string('email', 255);
+            $table->string('phone', 20);
+            $table->string('subject', 100);
+            $table->string('message', 500);
+
+            $table->foreignIdFor(User::class, 'broker_id')
+                ->constrained(table: 'users')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
             $table->timestamps();
         });
     }

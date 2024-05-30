@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\LeadStatus;
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,9 +18,16 @@ return new class extends Migration
             $table->string('name', 100);
             $table->string('email', 255);
             $table->string('phone', 20);
-            $table->string('subject', 10);
+            $table->string('subject', 100);
             $table->string('message', 500);
             $table->enum('status', LeadStatus::values());
+
+            $table->foreignIdFor(User::class)
+                ->nullable()
+                ->constrained()
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
             $table->timestamps();
         });
     }

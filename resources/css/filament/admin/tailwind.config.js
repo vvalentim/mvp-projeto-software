@@ -6,7 +6,7 @@ export default {
         "./app/Filament/**/*.php",
         "./resources/views/filament/**/*.blade.php",
         "./resources/views/vendor/**/*.blade.php",
-        "./resources/views/followups-kanban/**/*.blade.php",
+        "./resources/views/components/followups-kanban/**/*.blade.php",
         "./vendor/filament/**/*.blade.php",
     ],
 };

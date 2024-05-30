@@ -14,12 +14,6 @@ class FollowUp extends Model implements Sortable
 {
     use HasFactory, IsKanbanRecord, SortableTrait;
 
-    protected $fillable = [
-        'status',
-        'lead_id',
-        'broker_id',
-    ];
-
     protected function casts()
     {
         return [
@@ -32,13 +26,27 @@ class FollowUp extends Model implements Sortable
         return $this->belongsTo(User::class, foreignKey: 'broker_id');
     }
 
-    public function lead(): BelongsTo
+    public function estate(): BelongsTo
     {
-        return $this->belongsTo(Lead::class);
+        return $this->belongsTo(
+            RealEstate::class,
+            foreignKey: 'real_estate_id',
+            ownerKey: 'id'
+        );
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     public function getKanbanRecordTitle(): string
     {
-        return $this->lead->name;
+        return $this->name;
+    }
+
+    public function getKanbanRecordContent(): string
+    {
+        return $this->phone;
     }
 }

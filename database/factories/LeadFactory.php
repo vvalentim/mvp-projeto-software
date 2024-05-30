@@ -2,6 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Enums\LeadStatus;
+use App\Models\RealEstate;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,22 +19,31 @@ class LeadFactory extends Factory
      */
     public function definition(): array
     {
-        $fakerBR = fake('pt_BR');
+        $faker = fake('pt_BR');
 
         return [
-            'name' => "{$fakerBR->firstName()} {$fakerBR->lastName()}",
-            'email' => $fakerBR->email(),
-            'phone' => $fakerBR->cellPhoneNumber(),
-            'subject' => fake()->randomElement(['buy', 'sell', 'question', 'suggestion']),
+            'name' => "{$faker->firstName()} {$faker->lastName()}",
+            'email' => $faker->email(),
+            'phone' => $faker->cellPhoneNumber(),
+            'subject' => fake()->sentence(3),
             'message' => fake()->text(50),
-            'status' => 'unverified',
+            'status' => LeadStatus::Unverified,
+            'real_estate_id' => RealEstate::factory(),
         ];
     }
 
     public function verified(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'verified',
+            'status' => LeadStatus::Verified,
+        ]);
+    }
+
+    public function assigned(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => LeadStatus::Assigned,
+            'user_id' => User::factory(),
         ]);
     }
 }

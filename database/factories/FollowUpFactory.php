@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\FollowUpStatus;
 use App\Models\Lead;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -19,9 +20,7 @@ class FollowUpFactory extends Factory
     public function definition(): array
     {
         return [
-            'status' => 'lead',
-            'broker_id' => User::factory(),
-            'lead_id' => Lead::factory(),
+            'status' => fake()->randomElement(FollowUpStatus::values()),
         ];
     }
 }

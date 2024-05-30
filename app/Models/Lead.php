@@ -11,15 +11,6 @@ class Lead extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        'subject',
-        'message',
-        'status'
-    ];
-
     protected function casts()
     {
         return [
@@ -30,5 +21,14 @@ class Lead extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function estate(): BelongsTo
+    {
+        return $this->belongsTo(
+            RealEstate::class,
+            foreignKey: 'real_estate_id',
+            ownerKey: 'id'
+        );
     }
 }
