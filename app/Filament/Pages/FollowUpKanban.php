@@ -13,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\RawJs;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
 
@@ -45,12 +46,12 @@ class FollowUpKanban extends KanbanBoard
     protected function records(): Collection
     {
         return $this->getEloquentQuery()
-            ->where('broker_id', auth()->id())
+            ->where('user_id', auth()->id())
             ->when(method_exists(static::$model, 'scopeOrdered'), fn ($query) => $query->ordered())
             ->get();
     }
 
-    public function getRealEstateSelectComponent(): Select
+    protected function getRealEstateSelectComponent(): Select
     {
         return Select::make('real_estate_id')
             ->label('Imóvel')
@@ -65,6 +66,33 @@ class FollowUpKanban extends KanbanBoard
             ->required();
     }
 
+    protected function getFormSchema(): array
+    {
+        return [
+            $this->getRealEstateSelectComponent(),
+            TextInput::make('name')
+                ->required()
+                ->maxLength(100)
+                ->label('Nome'),
+            TextInput::make('email')
+                ->required()
+                ->label('Email'),
+            TextInput::make('phone')
+                ->required()
+                ->maxLength(20)
+                ->mask(RawJs::make(<<<'JS'
+                    $input.length <= 14 ? '(99) 9999-9999' : '(99) 99999-9999'
+                JS))
+                ->label('Telefone'),
+            TextInput::make('subject')
+                ->label('Assunto')
+                ->maxLength(100),
+            Textarea::make('message')
+                ->label('Mensagem')
+                ->maxLength(500)
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -73,41 +101,22 @@ class FollowUpKanban extends KanbanBoard
                 ->label('Novo Lead')
                 ->model(Lead::class)
                 ->modalHeading('Novo Lead')
-                ->form([
-                    $this->getRealEstateSelectComponent(),
-                    TextInput::make('name')
-                        ->required()
-                        ->maxLength(100)
-                        ->label('Nome'),
-                    TextInput::make('email')
-                        ->required()
-                        ->label('Email'),
-                    TextInput::make('phone')
-                        ->required()
-                        ->maxLength(20)
-                        ->mask(RawJs::make(<<<'JS'
-                            $input.length <= 14 ? '(99) 9999-9999' : '(99) 99999-9999'
-                        JS))
-                        ->label('Telefone'),
-                    TextInput::make('subject')
-                        ->label('Assunto')
-                        ->maxLength(100),
-                    Textarea::make('message')
-                        ->label('Mensagem')
-                        ->maxLength(500)
-                ])
+                ->form($this->getFormSchema())
                 ->mutateFormDataUsing(fn (array $data): array => [
                     ...$data,
                     'status' => LeadStatus::Assigned,
+                    'user_id' => auth()->id(),
                 ])
-                ->createAnother(false)
-                ->after(function (Lead $record) {
-                    FollowUp::factory()->create([
-                        'status' => FollowUpStatus::Lead,
-                        'broker_id' => auth()->id(),
-                        'lead_id' => $record->getKey(),
-                    ]);
+                ->after(function (array $data) {
+                    FollowUp::factory()
+                        ->create([
+                            ...Arr::except($data, ['id', 'status']),
+                            'status' => FollowUpStatus::Lead,
+                        ]);
                 })
+                ->failureNotificationTitle('Não foi possível criar um novo lead')
+                ->successNotificationTitle('Lead criado com sucesso')
+                ->createAnother(false)
         ];
     }
 }

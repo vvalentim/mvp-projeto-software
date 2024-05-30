@@ -11,6 +11,17 @@ class Lead extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+        'email',
+        'phone',
+        'subject',
+        'message',
+        'status',
+        'real_estate_id',
+        'user_id'
+    ];
+
     protected function casts()
     {
         return [

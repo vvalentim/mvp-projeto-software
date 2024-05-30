@@ -21,9 +21,9 @@ class FollowUp extends Model implements Sortable
         ];
     }
 
-    public function broker(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, foreignKey: 'broker_id');
+        return $this->belongsTo(User::class);
     }
 
     public function estate(): BelongsTo

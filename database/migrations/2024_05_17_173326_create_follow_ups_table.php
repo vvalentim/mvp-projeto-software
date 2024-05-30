@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('subject', 100);
             $table->string('message', 500);
 
-            $table->foreignIdFor(User::class, 'broker_id')
+            $table->foreignIdFor(User::class)
                 ->constrained(table: 'users')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();

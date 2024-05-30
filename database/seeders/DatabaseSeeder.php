@@ -81,7 +81,7 @@ class DatabaseSeeder extends Seeder
                     'subject' => $lead->subject,
                     'message' => $lead->message,
                     'real_estate_id' => $lead->real_estate_id,
-                    'broker_id' => $lead->user_id,
+                    'user_id' => $lead->user_id,
                 ]);
         }
 
