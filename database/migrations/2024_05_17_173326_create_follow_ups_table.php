@@ -22,8 +22,8 @@ return new class extends Migration
             $table->string('name', 100);
             $table->string('email', 255);
             $table->string('phone', 20);
-            $table->string('subject', 100);
-            $table->string('message', 500);
+            $table->string('subject', 100)->nullable();
+            $table->string('message', 500)->nullable();
 
             $table->foreignIdFor(User::class)
                 ->constrained(table: 'users')

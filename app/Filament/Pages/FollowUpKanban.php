@@ -76,6 +76,7 @@ class FollowUpKanban extends KanbanBoard
                 ->label('Nome'),
             TextInput::make('email')
                 ->required()
+                ->email()
                 ->label('Email'),
             TextInput::make('phone')
                 ->required()
