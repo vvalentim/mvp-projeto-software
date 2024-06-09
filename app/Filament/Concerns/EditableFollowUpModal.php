@@ -26,17 +26,29 @@ trait EditableFollowUpModal
         ])
             ->find($this->editModalRecordId)
             ->toArray();
-
+        // dd($record);
         return [
             'lead' => Arr::only($record, ['name', 'email', 'phone', 'subject', 'message']),
             'estate' => $record['estate'],
             'owners' => $record['estate']['owners'],
             'customer' => $record['customer'],
+            'status' => $record['status'] 
         ];
+    }
+
+    public function createPdf()
+    {
+        // Logic to create a PDF using data from the database
+        $data = $this->getRecordState();
+
+
+        dd($data);
     }
 
     protected function getLeadTab(): Tab
     {
+        $state = $this->getRecordState();
+
         return Tab::make('Lead')
             ->schema([
                 Section::make('Informações do lead')
@@ -59,7 +71,10 @@ trait EditableFollowUpModal
                     ->id('lead-tab-section'),
                 Actions::make([
                     Action::make('Adicionar dados do cliente')
-                        ->button()
+                        ->button(),
+                    Action::make('Gerar proposta')->visible($state['status'] === 'prospect' || $state['status'] === 'opportunity')
+                        ->action('createPdf')
+                        ->button(),
                 ])
                     ->alignEnd()
             ]);
