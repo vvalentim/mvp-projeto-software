@@ -10,6 +10,7 @@ use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\Tabs;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Filament\Infolists\Components\Tabs\Tab;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
@@ -32,17 +33,23 @@ trait EditableFollowUpModal
             'estate' => $record['estate'],
             'owners' => $record['estate']['owners'],
             'customer' => $record['customer'],
-            'status' => $record['status'] 
+            'status' => $record['status'],
+            'all'=> $record,
         ];
     }
 
     public function createPdf()
     {
-        // Logic to create a PDF using data from the database
-        $data = $this->getRecordState();
+        dd(1);
+        // info(1);
+        // $data = $this->getRecordState();
+        // $data =  mb_convert_encoding($data['all'], 'UTF-8', 'UTF-8');
+       
+        // $pdf = PDF::loadView('pdf_template',$data);
+        // return response()->streamDownload(function () use ($pdf) {
+        //     echo $pdf->stream();
+        //     }, 'proposta.pdf');
 
-
-        dd($data);
     }
 
     protected function getLeadTab(): Tab
@@ -72,8 +79,8 @@ trait EditableFollowUpModal
                 Actions::make([
                     Action::make('Adicionar dados do cliente')
                         ->button(),
-                    Action::make('Gerar proposta')->visible($state['status'] === 'prospect' || $state['status'] === 'opportunity')
-                        ->action('createPdf')
+                    Action::make('Gerar proposta')->visible($state['status'] === 'opportunity')
+                        ->action(fn() =>dd(1))
                         ->button(),
                 ])
                     ->alignEnd()
