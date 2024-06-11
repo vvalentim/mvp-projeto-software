@@ -2,6 +2,7 @@
 
 namespace App\Filament\Concerns;
 
+use App\Enums\FollowUpStatus;
 use App\Enums\MaritalStatus;
 use App\Models\FollowUp;
 use Filament\Infolists\Components\Actions;
@@ -15,25 +16,41 @@ use Filament\Infolists\Components\Tabs\Tab;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Illuminate\Support\Arr;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Filament\Notifications\Notification;
 
 trait EditableFollowUpModal
 {
+    protected ?FollowUp $editModalCurrentRecord = null;
+
+    protected function getCurrentRecord(): ?FollowUp
+    {
+        if (
+            empty($this->editModalCurrentRecord) ||
+            $this->editModalRecordId != $this->editModalCurrentRecord->id
+        ) {
+            $this->editModalCurrentRecord = FollowUp::query()
+                ->with(['estate.owners.person', 'customer.person'])
+                ->find($this->editModalRecordId);
+        }
+
+        return $this->editModalCurrentRecord;
+    }
 
     protected function getRecordState(): array
     {
-        $record = FollowUp::with([
-            'estate.owners.person',
-            'customer.person'
-        ])
-            ->find($this->editModalRecordId)
-            ->toArray();
+        $state = [];
 
-        return [
-            'lead' => Arr::only($record, ['name', 'email', 'phone', 'subject', 'message']),
-            'estate' => $record['estate'],
-            'owners' => $record['estate']['owners'],
-            'customer' => $record['customer'],
-        ];
+        if ($this->getCurrentRecord()) {
+            $recordArr = $this->getCurrentRecord()->toArray();
+
+            $state = Arr::only($recordArr, ['status', 'customer']);
+            $state['lead'] = Arr::only($recordArr, ['name', 'email', 'phone', 'subject', 'message']);
+            $state['estate'] = Arr::except($recordArr['estate'], 'owners');
+            $state['owners'] = $recordArr['estate']['owners'];
+        }
+
+        return $state;
     }
 
     protected function getLeadTab(): Tab
@@ -58,6 +75,7 @@ trait EditableFollowUpModal
                     ])
                     ->compact()
                     ->id('lead-tab-section'),
+
                 Actions::make([
                     Action::make('Vincular cadastro do cliente')
                         ->button()
@@ -68,6 +86,8 @@ trait EditableFollowUpModal
 
     public function getCustomerTab(): Tab
     {
+        $record = $this->getCurrentRecord();
+
         return Tab::make('Cliente')
             ->schema([
                 Section::make('Informações do cliente')
@@ -116,8 +136,11 @@ trait EditableFollowUpModal
                     Action::make('Alterar cadastro do cliente')
                         ->button()
                         ->color('gray'),
+
                     Action::make('Gerar proposta')
-                        ->button()
+                        ->visible($record->status === FollowUpStatus::Opportunity)
+                        ->action('createPdf')
+                        ->button(),
                 ])
                     ->alignEnd()
             ]);
@@ -135,10 +158,12 @@ trait EditableFollowUpModal
                                 TextEntry::make('estate.title')->label('Título'),
                                 TextEntry::make('estate.type')->label('Tipo'),
                             ]),
+
                         TextEntry::make('estate.description')->label('Descrição'),
                     ])
                     ->compact()
                     ->id('estate-tab-section'),
+
                 Actions::make([
                     Action::make('Alterar o imóvel de interesse')
                         ->button()
@@ -190,5 +215,24 @@ trait EditableFollowUpModal
                     ->tabs($tabs)
                     ->contained(false),
             ]);
+    }
+
+    public function createPdf()
+    {
+        $record = $this->getCurrentRecord();
+
+        $data = [
+            'nomeCliente' => $record->customer->person->name,
+            'estadoCivil' => $record->customer->marital_status->getLabel(),
+        ];
+
+        $data = mb_convert_encoding($data, 'UTF-8');
+
+        $pdf = PDF::loadView('pdf_template', $data);
+
+        return response()
+            ->streamDownload(function () use ($pdf) {
+                echo $pdf->stream();
+            }, 'proposta.pdf');
     }
 }
