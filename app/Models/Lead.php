@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Enums\LeadStatus;
+use App\Models\Traits\IsSearchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Lead extends Model
 {
-    use HasFactory;
+    use HasFactory, IsSearchable;
 
     protected $fillable = [
         'name',
@@ -41,5 +42,13 @@ class Lead extends Model
             foreignKey: 'real_estate_id',
             ownerKey: 'id'
         );
+    }
+
+    public function getSearchLabel(): string
+    {
+        $label = $this->name;
+        $label .= ' - ' . $this->email;
+
+        return $label;
     }
 }

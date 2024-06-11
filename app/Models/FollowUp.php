@@ -14,6 +14,18 @@ class FollowUp extends Model implements Sortable
 {
     use HasFactory, IsKanbanRecord, SortableTrait;
 
+    protected $fillable = [
+        'status',
+        'name',
+        'email',
+        'phone',
+        'subject',
+        'message',
+        'real_estate_id',
+        'customer_id',
+        'user_id',
+    ];
+
     protected function casts()
     {
         return [
@@ -42,11 +54,19 @@ class FollowUp extends Model implements Sortable
 
     public function getKanbanRecordTitle(): string
     {
+        if ($this->customer_id) {
+            return $this->customer->person->name;
+        }
+
         return $this->name;
     }
 
     public function getKanbanRecordContent(): string
     {
+        if ($this->customer_id) {
+            return $this->customer->person->phone_1;
+        }
+
         return $this->phone;
     }
 }
