@@ -2,7 +2,6 @@
 
 namespace App\Filament\Concerns;
 
-use App\Models\Customer;
 use App\Models\FollowUp;
 use Filament\Infolists\Components\Actions;
 use Filament\Infolists\Components\Actions\Action;
