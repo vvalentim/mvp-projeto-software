@@ -14,6 +14,15 @@ enum MaritalStatus: string
     case Single = 'single';
     case Divorced = 'divorced';
 
+    public static function localizedFilterOptions(): array
+    {
+        return [
+            'married' => 'Casado(a)',
+            'single' => 'Solteiro(a)',
+            'divorced' => 'Divorciado(a)'
+        ];
+    }
+
     public function getLocalizedLabel(): string
     {
         return match ($this) {

@@ -15,6 +15,16 @@ enum FollowUpStatus: string
     case Opportunity = 'opportunity';
     case Concluded = 'concluded';
 
+    public static function localizedFilterOptions(): array
+    {
+        return [
+            'lead' => 'Lead',
+            'prospect' => 'Em visitação',
+            'opportunity' => 'Proposta',
+            'concluded' => 'Finalizado',
+        ];
+    }
+
     public function getLocalizedLabel(): string
     {
         return match ($this) {

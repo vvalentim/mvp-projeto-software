@@ -19,9 +19,9 @@ return new class extends Migration
             $table->enum('status', FollowUpStatus::values());
             $table->unsignedInteger('order_column');
 
-            $table->string('name', 100);
-            $table->string('email', 255);
-            $table->string('phone', 20);
+            $table->string('name', 100)->nullable();
+            $table->string('email', 255)->nullable();
+            $table->string('phone', 20)->nullable();
             $table->string('subject', 100)->nullable();
             $table->string('message', 500)->nullable();
 

@@ -19,29 +19,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $admin = User::factory()
-            ->recycle(Person::factory()->create())
-            ->create([
-                'name' => 'admin',
-                'email' => 'admin@admin.com',
-                'password' => '123abc',
-            ]);
+        $admin = User::factory()->create([
+            'name' => 'admin',
+            'email' => 'admin@admin.com',
+            'password' => '123abc',
+        ]);
 
-        $brokerA = User::factory()
-            ->recycle(Person::factory()->create())
-            ->create([
-                'name' => 'broker.a',
-                'email' => 'a@broker.com',
-                'password' => '123abc',
-            ]);
+        $brokerA = User::factory()->create([
+            'name' => 'broker.a',
+            'email' => 'a@broker.com',
+            'password' => '123abc',
+        ]);
 
-        $brokerB = User::factory()
-            ->recycle(Person::factory()->create())
-            ->create([
-                'name' => 'broker.b',
-                'email' => 'b@broker.com',
-                'password' => '123abc',
-            ]);
+        $brokerB = User::factory()->create([
+            'name' => 'broker.b',
+            'email' => 'b@broker.com',
+            'password' => '123abc',
+        ]);
 
 
         $estates = RealEstate::factory(20)->create();

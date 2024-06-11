@@ -5,13 +5,13 @@ namespace App\Enums;
 use App\Enums\Traits\HasValuesEnum;
 use App\Enums\Traits\IsLocalizedEnum;
 
-enum LeadStatus: string
+enum UserRoles: string
 {
     use HasValuesEnum, IsLocalizedEnum;
 
-    case Unverified = 'unverified';
-    case Verified = 'verified';
-    case Assigned = 'assigned';
+    case Admin = 'admin';
+    case Operator = 'operator';
+    case Broker = 'broker';
 
     public static function localizedFilterOptions(): array
     {
@@ -25,9 +25,9 @@ enum LeadStatus: string
     public function getLocalizedLabel(): string
     {
         return match ($this) {
-            static::Unverified => 'Não verificado',
-            static::Verified => 'Verificado',
-            static::Assigned => 'Atribuído'
+            static::Admin => 'Administrador',
+            static::Operator => 'Operador',
+            static::Broker => 'Corretor'
         };
     }
 }
