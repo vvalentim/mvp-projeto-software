@@ -10,7 +10,7 @@ enum MaritalStatus: string implements HasLabel, IsLocalizedEnum
 {
     use HasValuesEnum;
 
-    case Nullable = '';
+    case Undefined = 'undefined';
     case Married = 'married';
     case Single = 'single';
     case Divorced = 'divorced';
@@ -18,19 +18,20 @@ enum MaritalStatus: string implements HasLabel, IsLocalizedEnum
     public static function localizedFilterOptions(): array
     {
         return [
+            'undefined' => 'Não informado',
             'married' => 'Casado(a)',
             'single' => 'Solteiro(a)',
-            'divorced' => 'Divorciado(a)'
+            'divorced' => 'Divorciado(a)',
         ];
     }
 
     public function getLabel(): string
     {
         return match ($this) {
+            static::Undefined => 'Não informado',
             static::Married => 'Casado(a)',
             static::Single => 'Solteiro(a)',
             static::Divorced => 'Divorciado(a)',
-            default => '',
         };
     }
 }

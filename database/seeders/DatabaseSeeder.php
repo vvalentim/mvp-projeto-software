@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\MaritalStatus;
 use App\Enums\UserRoles;
 use App\Models\Customer;
 use App\Models\FollowUp;
@@ -49,6 +50,27 @@ class DatabaseSeeder extends Seeder
             $customers[] = Customer::factory()
                 ->recycle($person)
                 ->create();
+        }
+
+        // Define required fields for customers of type 'Pessoa Física' 
+        foreach ($customers as $customer) {
+            if ($customer->person->type === 'F') {
+                $faker = fake('pt_BR');
+
+                $customer->filiation_mother = "{$faker->firstName('female')} {$faker->lastName('female')}";
+                $customer->filiation_father = "{$faker->firstName('male')} {$faker->lastName('male')}";
+                $customer->marital_status = $faker->randomElement(MaritalStatus::values());
+                $customer->profession = $faker->randomElement([
+                    'Engenheiro Civil',
+                    'Professor(a)',
+                    'Analista de Sistemas',
+                    'Advogado(a)',
+                    'Médico(a)',
+                    'Autônomo',
+                ]);
+
+                $customer->save();
+            }
         }
 
         // Associate at least one customer as an owner of an estate

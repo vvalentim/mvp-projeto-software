@@ -21,7 +21,7 @@ class CustomerFactory extends Factory
         $faker = fake('pt_BR');
 
         return [
-            'marital_status' => MaritalStatus::Nullable,
+            'marital_status' => MaritalStatus::Undefined,
             'person_id' => Person::factory()
         ];
     }

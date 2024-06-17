@@ -2,10 +2,12 @@
 
 namespace App\Filament\Concerns;
 
+use App\Enums\MaritalStatus;
 use App\Models\FollowUp;
 use Filament\Infolists\Components\Actions;
 use Filament\Infolists\Components\Actions\Action;
 use Filament\Infolists\Components\Grid;
+use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\Tabs;
@@ -57,7 +59,7 @@ trait EditableFollowUpModal
                     ->compact()
                     ->id('lead-tab-section'),
                 Actions::make([
-                    Action::make('Adicionar dados do cliente')
+                    Action::make('Vincular cadastro do cliente')
                         ->button()
                 ])
                     ->alignEnd()
@@ -71,12 +73,47 @@ trait EditableFollowUpModal
                 Section::make('Informações do cliente')
                     ->icon('heroicon-s-user')
                     ->schema([
-                        TextEntry::make('customer.person.name')->label('Nome'),
+                        Grid::make(2)
+                            ->schema([
+                                TextEntry::make('customer.person.name')
+                                    ->label('Nome'),
+
+                                TextEntry::make('customer.person.num_registry')
+                                    ->label(fn ($state) => strlen($state) > 14 ? 'CNPJ' : 'CPF'),
+
+                                TextEntry::make('customer.person.phone_1')
+                                    ->label('Telefone 1'),
+
+                                TextEntry::make('customer.person.phone_2')
+                                    ->label('Telefone 2'),
+
+                                Group::make()
+                                    ->schema([
+                                        Grid::make(2)
+                                            ->schema([
+                                                TextEntry::make('customer.filiation_mother')
+                                                    ->label('Filiação mãe'),
+
+                                                TextEntry::make('customer.filiation_father')
+                                                    ->label('Filiação pai'),
+
+                                                TextEntry::make('customer.marital_status')
+                                                    ->label('Estado civil')
+                                                    ->formatStateUsing(fn (string $state) => MaritalStatus::tryFrom($state)),
+
+                                                TextEntry::make('customer.profession')
+                                                    ->label('Profissão'),
+                                            ]),
+                                    ])
+                                    ->columnSpanFull()
+                            ])
+
                     ])
                     ->compact()
                     ->id('estate-tab-section'),
+
                 Actions::make([
-                    Action::make('Alterar dados do cliente')
+                    Action::make('Alterar cadastro do cliente')
                         ->button()
                         ->color('gray'),
                     Action::make('Gerar proposta')
