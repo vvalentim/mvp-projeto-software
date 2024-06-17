@@ -3,14 +3,14 @@
 namespace App\Models;
 
 use App\Enums\LeadStatus;
-use App\Models\Traits\IsSearchable;
+use App\Models\Contracts\IsSearchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Lead extends Model
+class Lead extends Model implements IsSearchable
 {
-    use HasFactory, IsSearchable;
+    use HasFactory;
 
     protected $fillable = [
         'name',

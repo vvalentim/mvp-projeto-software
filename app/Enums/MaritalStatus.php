@@ -3,11 +3,12 @@
 namespace App\Enums;
 
 use App\Enums\Traits\HasValuesEnum;
-use App\Enums\Traits\IsLocalizedEnum;
+use App\Enums\Contracts\IsLocalizedEnum;
+use Filament\Support\Contracts\HasLabel;
 
-enum MaritalStatus: string
+enum MaritalStatus: string implements HasLabel, IsLocalizedEnum
 {
-    use HasValuesEnum, IsLocalizedEnum;
+    use HasValuesEnum;
 
     case Nullable = '';
     case Married = 'married';
@@ -23,7 +24,7 @@ enum MaritalStatus: string
         ];
     }
 
-    public function getLocalizedLabel(): string
+    public function getLabel(): string
     {
         return match ($this) {
             static::Married => 'Casado(a)',

@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-use App\Models\Traits\IsSearchable;
+use App\Models\Contracts\IsSearchable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Person extends Model
+class Person extends Model implements IsSearchable
 {
-    use HasFactory, IsSearchable;
+    use HasFactory;
 
     protected function formatCpf(string $cpf)
     {

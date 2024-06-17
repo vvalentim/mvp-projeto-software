@@ -20,7 +20,8 @@ class FollowUpFactory extends Factory
     public function definition(): array
     {
         return [
-            'status' => fake()->randomElement(FollowUpStatus::values()),
+            // 'status' => fake()->randomElement(FollowUpStatus::values()),
+            'status' => FollowUpStatus::Lead,
         ];
     }
 }

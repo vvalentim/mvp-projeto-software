@@ -12,14 +12,12 @@ use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
 class FollowUpResource extends Resource
@@ -38,15 +36,7 @@ class FollowUpResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
-            ->whereBelongsTo(auth()->user())
-            ->with(['user', 'estate', 'customer.person']);
-    }
-
-    public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([]);
+        return parent::getEloquentQuery()->whereBelongsTo(auth()->user());
     }
 
     public static function table(Table $table): Table
@@ -60,22 +50,19 @@ class FollowUpResource extends Resource
                     ->label('Cliente')
                     ->formatStateUsing(fn (FollowUp $record): string => $record->getKanbanRecordTitle()),
 
-                TextColumn::make('created_at')
-                    ->label('Data de início')
+                TextColumn::make('estate.title')
+                    ->label('Imóvel'),
+
+                TextColumn::make('updated_at')
+                    ->label('Última atualização')
                     ->since()
                     ->sortable(),
 
                 TextColumn::make('status')
                     ->badge()
-                    ->formatStateUsing(fn (FollowUpStatus $state): string => $state->getLocalizedLabel())
-                    ->color(fn (FollowUpStatus $state): string => match ($state) {
-                        FollowUpStatus::Lead => 'gray',
-                        FollowUpStatus::Prospect => 'warning',
-                        FollowUpStatus::Opportunity => 'info',
-                        FollowUpStatus::Concluded => 'success'
-                    })
+                    ->formatStateUsing(fn (FollowUpStatus $state): string => $state->getLabel())
             ])
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('updated_at', 'desc')
             ->filters([
                 //
             ])
@@ -118,10 +105,49 @@ class FollowUpResource extends Resource
         }
     }
 
+    public static function handleLeadSelectState(Get $get, Select $component): void
+    {
+        $record = Lead::where('id', $get('lead_id'))->first();
+
+        if ($record) {
+            $group = $component->getContainer()->getComponent('dynamicGroupLead');
+
+            static::fillCustomFieldsWithRecord($group, Arr::dot($record->toArray()));
+        }
+    }
+
+    public static function handleCustomerSelectState(Get $get, Select $component): void
+    {
+        if ($get('customer_id')) {
+
+            $record = Customer::where('id', $get('customer_id'))->with('person')->first();
+
+            if ($record) {
+                $group = $component->getContainer()->getComponent('dynamicGroupCustomer');
+
+                static::fillCustomFieldsWithRecord($group, Arr::dot($record->toArray()));
+            }
+        }
+    }
+
+    public static function handleEstateSelectState(Get $get, Select $component): void
+    {
+        if ($get('real_estate_id')) {
+            $record = RealEstate::where('id', $get('real_estate_id'))->first();
+
+            if ($record) {
+                $group = $component->getContainer()->getComponent('dynamicGroupEstate');
+
+                static::fillCustomFieldsWithRecord($group, Arr::dot($record->toArray()));
+            }
+        }
+    }
+
     public static function getLeadSelector(): Select
     {
         return Select::make('lead_id')
             ->label('Lead')
+            ->placeholder('Digite o nome do lead ou o email para buscar...')
             ->searchable()
             ->required()
             ->reactive()
@@ -130,84 +156,63 @@ class FollowUpResource extends Resource
                     ->where('user_id', auth()->id())
                     ->where(function (Builder $query) use ($search) {
                         $query->where('name', 'ilike', "{$search}%")
-                            ->orWhere('email', 'like', "{$search}%");
+                            ->orWhere('email', 'ilike', "{$search}%");
                     })
                     ->limit(30)
                     ->get()
                     ->mapWithKeys(fn (Lead $record) => [$record->id => $record->getSearchLabel()]);
             })
-            ->afterStateUpdated(function (Get $get, Select $component) {
-                $record = Lead::where('id', $get('lead_id'))->first();
-
-                if ($record) {
-                    $group = $component->getContainer()->getComponent('dynamicGroupLead');
-
-                    static::fillCustomFieldsWithRecord($group, Arr::dot($record->toArray()));
-                }
-            });
+            ->afterStateUpdated(fn (Get $get, Select $component) => static::handleLeadSelectState($get, $component));
     }
 
     public static function getCustomerSelector(): Select
     {
-        return
-            Select::make('customer_id')
+        return Select::make('customer_id')
             ->label('Cliente')
+            ->placeholder('Digite o nome do cliente ou o documento para buscar...')
             ->searchable()
             ->required()
-            ->live()
-            ->relationship(
-                name: 'customer',
-                titleAttribute: 'name',
-                ignoreRecord: true,
-                modifyQueryUsing: function (Builder $query, string $search) {
-                    $query
-                        ->select('people.name AS name', 'customers.id AS id')
-                        ->join('people', 'people.id', '=', 'customers.person_id')
-                        ->limit(50)
-                        ->pluck('name', 'id');
-                }
-            )
-            ->getOptionLabelFromRecordUsing(fn (Model $record): ?string => Customer::find($record->id)->person->getSearchLabel())
-            ->afterStateUpdated(function (Get $get, Select $component) {
-                $record = Customer::where('id', $get('customer_id'))->with('person')->first();
-
-                if ($record) {
-                    $group = $component->getContainer()->getComponent('dynamicGroupCustomer');
-
-                    static::fillCustomFieldsWithRecord($group, Arr::dot($record->toArray()));
-                }
-            });
+            ->reactive()
+            ->getSearchResultsUsing(function (string $search) {
+                return Customer::query()
+                    ->with('person')
+                    ->select(['customers.id', 'customers.person_id'])
+                    ->join('people', 'people.id', '=', 'customers.person_id')
+                    ->where('people.name', 'ilike', "{$search}%")
+                    ->orWhere('people.num_registry', 'like', "{$search}%")
+                    ->limit(30)
+                    ->get()
+                    ->mapWithKeys(fn (?Customer $record) => [$record->id => $record?->person->getSearchLabel()]);
+            })
+            ->getOptionLabelUsing(fn ($value): ?string => Customer::find($value)?->person->getSearchLabel())
+            ->afterStateUpdated(fn (Get $get, Select $component) => static::handleCustomerSelectState($get, $component))
+            ->afterStateHydrated(fn (Get $get, Select $component) => static::handleCustomerSelectState($get, $component));
     }
 
     public static function getEstateSelector(): Select
     {
-        return
-            Select::make('real_estate_id')
-            ->label('Imóvel de interesse')
+        return Select::make('real_estate_id')
+            ->label('Imóvel')
+            ->placeholder('Digite o título do anúncio ou o CEP do imóvel para buscar...')
             ->searchable()
             ->required()
-            ->live()
-            ->relationship(
-                name: 'estate',
-                titleAttribute: 'title',
-                ignoreRecord: true,
-            )
-            ->getOptionLabelFromRecordUsing(fn (Model $record): ?string => $record?->getSearchLabel())
-            ->afterStateUpdated(function (Get $get, Select $component) {
-                $record = RealEstate::where('id', $get('real_estate_id'))->first();
-
-                if ($record) {
-                    $group = $component->getContainer()->getComponent('dynamicGroupEstate');
-
-                    static::fillCustomFieldsWithRecord($group, Arr::dot($record->toArray()));
-                }
-            });
+            ->reactive()
+            ->getSearchResultsUsing(function (string $search) {
+                return RealEstate::query()
+                    ->where('title', 'ilike', "{$search}%")
+                    ->orWhere('zip_code', 'like', "{$search}%")
+                    ->limit(30)
+                    ->get()
+                    ->mapWithKeys(fn (?RealEstate $record) => [$record->id => $record?->getSearchLabel()]);
+            })
+            ->getOptionLabelUsing(fn ($value): ?string => RealEstate::find($value)?->getSearchLabel())
+            ->afterStateUpdated(fn (Get $get, Select $component) => static::handleEstateSelectState($get, $component))
+            ->afterStateHydrated(fn (Get $get, Select $component) => static::handleEstateSelectState($get, $component));
     }
 
     public static function getLeadGroup(): Group
     {
-        return
-            Group::make()
+        return Group::make()
             ->schema([
                 TextInput::make('name')
                     ->label('Nome')
@@ -222,7 +227,7 @@ class FollowUpResource extends Resource
                     ->disabled()
             ])
             ->key('dynamicGroupLead')
-            ->hidden(fn (callable $get): bool => !$get('lead_id'));
+            ->visible(fn (callable $get) => $get('lead_id'));
     }
 
     public static function getCustomerGroup(): Group
@@ -247,7 +252,7 @@ class FollowUpResource extends Resource
                     ->disabled()
             ])
             ->key('dynamicGroupCustomer')
-            ->hidden(fn (callable $get): bool => !$get('customer_id'));
+            ->visible(fn (callable $get) => $get('customer_id'));
     }
 
     public static function getEstateGroup(): Group
@@ -268,9 +273,10 @@ class FollowUpResource extends Resource
                     ->disabled(),
                 TextInput::make('price')
                     ->label('Preço')
+                    ->prefix('R$')
                     ->disabled()
             ])
             ->key('dynamicGroupEstate')
-            ->hidden(fn (callable $get): bool => !$get('real_estate_id'));
+            ->visible(fn (callable $get) => $get('real_estate_id'));
     }
 }

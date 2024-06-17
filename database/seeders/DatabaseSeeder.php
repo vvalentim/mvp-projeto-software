@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Enums\LeadStatus;
+use App\Enums\UserRoles;
 use App\Models\Customer;
 use App\Models\FollowUp;
 use App\Models\Lead;
@@ -21,20 +21,23 @@ class DatabaseSeeder extends Seeder
     {
         $admin = User::factory()->create([
             'name' => 'admin',
-            'email' => 'admin@admin.com',
+            'email' => 'admin@mail.com',
             'password' => '123abc',
+            'role' => UserRoles::Admin
         ]);
 
         $brokerA = User::factory()->create([
-            'name' => 'broker.a',
-            'email' => 'a@broker.com',
+            'name' => 'operador',
+            'email' => 'operador@mail.com',
             'password' => '123abc',
+            'role' => UserRoles::Operator
         ]);
 
         $brokerB = User::factory()->create([
-            'name' => 'broker.b',
-            'email' => 'b@broker.com',
+            'name' => 'corretor',
+            'email' => 'corretor@mail.com',
             'password' => '123abc',
+            'role' => UserRoles::Broker
         ]);
 
 
@@ -58,7 +61,7 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        $leads = Lead::factory(50)
+        $leads = Lead::factory(20)
             ->recycle($estates)
             ->recycle($admin, $brokerA, $brokerB)
             ->assigned()

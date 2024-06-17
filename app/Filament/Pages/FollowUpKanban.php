@@ -42,7 +42,7 @@ class FollowUpKanban extends KanbanBoard
     protected function records(): Collection
     {
         return $this->getEloquentQuery()
-            ->where('user_id', auth()->id())
+            ->whereBelongsTo(auth()->user())
             ->when(method_exists(static::$model, 'scopeOrdered'), fn ($query) => $query->ordered())
             ->get();
     }

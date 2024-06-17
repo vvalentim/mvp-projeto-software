@@ -5,6 +5,7 @@ namespace App\Filament\Resources\FollowUpResource\Pages;
 use App\Enums\FollowUpStatus;
 use App\Filament\Resources\FollowUpResource;
 use App\Models\Lead;
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Wizard;
@@ -34,6 +35,19 @@ class CreateFollowUp extends CreateRecord
                     ->contained(),
             ])
             ->columns('full');
+    }
+
+    public static function fillCustomFieldsWithRecord(Component $group, array $record): void
+    {
+        $fields = $group->getChildComponents();
+
+        foreach ($fields as $field) {
+            $path = $field->getStatePath(false);
+
+            if (array_key_exists($path, $record)) {
+                $field->state($record[$path]);
+            }
+        }
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

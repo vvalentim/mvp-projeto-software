@@ -12,7 +12,7 @@ trait IsKanbanStatus
             ->map(function (self $item) {
                 return [
                     'id' => $item->getId(),
-                    'title' => $item->getLocalizedLabel(),
+                    'title' => $item->getLabel(),
                 ];
             });
     }

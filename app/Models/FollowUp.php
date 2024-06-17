@@ -3,16 +3,16 @@
 namespace App\Models;
 
 use App\Enums\FollowUpStatus;
-use App\Models\Traits\IsKanbanRecord;
+use App\Models\Contracts\IsKanbanRecord;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 
-class FollowUp extends Model implements Sortable
+class FollowUp extends Model implements Sortable, IsKanbanRecord
 {
-    use HasFactory, IsKanbanRecord, SortableTrait;
+    use HasFactory, SortableTrait;
 
     protected $fillable = [
         'status',
