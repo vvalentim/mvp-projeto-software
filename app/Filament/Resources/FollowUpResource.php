@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Enums\FollowUpStatus;
+use App\Enums\RealEstateTypes;
 use App\Filament\Resources\FollowUpResource\Pages;
 use App\Models\Customer;
 use App\Models\FollowUp;
@@ -262,15 +263,20 @@ class FollowUpResource extends Resource
                 TextInput::make('title')
                     ->label('Título do anúncio')
                     ->disabled(),
+
                 TextInput::make('type')
                     ->label('Tipo do imóvel')
-                    ->disabled(),
+                    ->disabled()
+                    ->formatStateUsing(fn ($state) => RealEstateTypes::tryFrom($state)?->getLabel() ?? $state),
+
                 TextInput::make('description')
                     ->label('Descrição do imóvel')
                     ->disabled(),
+
                 TextInput::make('zip_code')
                     ->label('CEP')
                     ->disabled(),
+
                 TextInput::make('price')
                     ->label('Preço')
                     ->prefix('R$')
