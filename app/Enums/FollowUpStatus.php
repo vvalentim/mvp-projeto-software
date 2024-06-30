@@ -20,10 +20,10 @@ enum FollowUpStatus: string implements HasColor, HasLabel, IsLocalizedEnum
     public static function localizedFilterOptions(): array
     {
         return [
-            'lead' => 'Lead',
-            'prospect' => 'Em visitação',
-            'opportunity' => 'Proposta',
-            'concluded' => 'Finalizado',
+            static::Lead->value => 'Lead',
+            static::Prospect->value => 'Em visitação',
+            static::Opportunity->value => 'Proposta',
+            static::Concluded->value => 'Finalizado',
         ];
     }
 

@@ -18,10 +18,10 @@ enum MaritalStatus: string implements HasLabel, IsLocalizedEnum
     public static function localizedFilterOptions(): array
     {
         return [
-            'undefined' => 'Não informado',
-            'married' => 'Casado(a)',
-            'single' => 'Solteiro(a)',
-            'divorced' => 'Divorciado(a)',
+            static::Undefined->value => 'Não informado',
+            static::Married->value => 'Casado(a)',
+            static::Single->value => 'Solteiro(a)',
+            static::Divorced->value => 'Divorciado(a)',
         ];
     }
 

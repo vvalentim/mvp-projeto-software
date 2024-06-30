@@ -18,9 +18,9 @@ enum LeadStatus: string implements HasLabel, HasColor, IsLocalizedEnum
     public static function localizedFilterOptions(): array
     {
         return [
-            'unverified' => 'Não verificado',
-            'verified' => 'Verificado',
-            'assigned' => 'Atribuído'
+            static::Unverified->value => 'Não verificado',
+            static::Verified->value => 'Verificado',
+            static::Assigned->value => 'Atribuído'
         ];
     }
 

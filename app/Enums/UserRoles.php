@@ -17,9 +17,9 @@ enum UserRoles: string implements HasLabel, IsLocalizedEnum
     public static function localizedFilterOptions(): array
     {
         return [
-            'unverified' => 'Não verificado',
-            'verified' => 'Verificado',
-            'assigned' => 'Atribuído'
+            static::Admin->value => 'Administrador',
+            static::Operator->value => 'Operador',
+            static::Broker->value => 'Corretor'
         ];
     }
 
