@@ -31,8 +31,9 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('estate_owner', function (Blueprint $table) {
+        Schema::create('estate_owners', function (Blueprint $table) {
             $table->id();
+            $table->timestamps();
 
             $table->foreignIdFor(RealEstate::class)
                 ->constrained()
@@ -52,6 +53,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('customers');
-        Schema::dropIfExists('estate_owner');
+        Schema::dropIfExists('estate_owners');
     }
 };

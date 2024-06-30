@@ -25,13 +25,13 @@ return new class extends Migration
             $table->string('type');
             $table->string('title');
             $table->string('description');
-            $table->unsignedInteger('area_total');
-            $table->unsignedInteger('area_built');
-            $table->tinyInteger(column: 'num_rooms', unsigned: true);
-            $table->tinyInteger(column: 'num_suite', unsigned: true);
-            $table->tinyInteger(column: 'num_garage', unsigned: true);
+            $table->decimal('area_total');
+            $table->decimal('area_built');
+            $table->tinyInteger(column: 'num_rooms', unsigned: true)->nullable();
+            $table->tinyInteger(column: 'num_suite', unsigned: true)->nullable();
+            $table->tinyInteger(column: 'num_garage', unsigned: true)->nullable();
 
-            $table->unsignedInteger('price');
+            $table->decimal('price', 11, 2);
             $table->decimal('tax_iptu');
             $table->decimal('tax_condominium')->nullable();
 

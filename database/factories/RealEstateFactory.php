@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\RealEstateTypes;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,18 +18,18 @@ class RealEstateFactory extends Factory
     public function definition(): array
     {
         $faker = fake('pt_BR');
-        $realStateTypes = ['Casa', 'Apartamento', 'Sobrado', 'Lote', 'Casa em condomínio'];
         $prefixNeighborhood = ['Jardim', 'Vila', 'Bairro', 'Núcleo', 'Parque', ''];
         $suffixNeighborhood = ['Oficinas', 'Neves', 'Bela Vista', 'Boa Vista', 'Esplanada', 'Santa Paula'];
 
         $neighborhood = trim("{$faker->randomElement($prefixNeighborhood)} {$faker->randomElement($suffixNeighborhood)}");
-        $type = $faker->randomElement($realStateTypes);
-        $title = trim("{$type} {$faker->randomElement($suffixNeighborhood)}");
+        $type = $faker->randomElement(RealEstateTypes::values());
+        $typeLabel = RealEstateTypes::from($type)->getLabel();
+        $title = trim("{$typeLabel} {$faker->randomElement($suffixNeighborhood)}");
 
         $areaTotal = $faker->numberBetween(100, 2000);
         $areaBuilt = $faker->numberBetween(10, $areaTotal);
 
-        $taxCondominium = in_array($type, ['Apartamento', 'Casa em condomínio'])
+        $taxCondominium = in_array($type, [RealEstateTypes::Apartment->value, RealEstateTypes::Condominium->value])
             ? $faker->randomFloat(2, 100, 10000)
             : 0.00;
 
@@ -38,8 +39,8 @@ class RealEstateFactory extends Factory
             'address_city' => $faker->city(),
             'address_neighborhood' => $neighborhood,
             'address_street' => $faker->streetName(),
-            'address_number' => $faker->secondaryAddress(),
-
+            'address_number' => $faker->numberBetween(1, 9999),
+            'address_complement' => $faker->secondaryAddress(),
             'type' => $type,
             'title' => $title,
             'description' => $faker->text(50),
