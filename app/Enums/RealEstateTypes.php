@@ -2,10 +2,11 @@
 
 namespace App\Enums;
 
-use App\Enums\Contracts\IsLocalizedEnum;
 use App\Enums\Traits\HasValuesEnum;
+use App\Enums\Contracts\IsLocalizedEnum;
+use Filament\Support\Contracts\HasLabel;
 
-enum RealEstateTypes: string implements IsLocalizedEnum
+enum RealEstateTypes: string implements HasLabel, IsLocalizedEnum
 {
     use HasValuesEnum;
 

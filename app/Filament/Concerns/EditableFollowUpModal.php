@@ -4,6 +4,7 @@ namespace App\Filament\Concerns;
 
 use App\Enums\FollowUpStatus;
 use App\Enums\MaritalStatus;
+use App\Enums\RealEstateTypes;
 use App\Models\FollowUp;
 use Filament\Infolists\Components\Actions;
 use Filament\Infolists\Components\Actions\Action;
@@ -17,7 +18,6 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Illuminate\Support\Arr;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
-use Filament\Notifications\Notification;
 
 trait EditableFollowUpModal
 {
@@ -155,11 +155,16 @@ trait EditableFollowUpModal
                     ->schema([
                         Grid::make(2)
                             ->schema([
-                                TextEntry::make('estate.title')->label('Título'),
-                                TextEntry::make('estate.type')->label('Tipo'),
+                                TextEntry::make('estate.title')
+                                    ->label('Título'),
+
+                                TextEntry::make('estate.type')
+                                    ->label('Tipo')
+                                    ->formatStateUsing(fn ($state) => RealEstateTypes::tryFrom($state)),
                             ]),
 
-                        TextEntry::make('estate.description')->label('Descrição'),
+                        TextEntry::make('estate.description')
+                            ->label('Descrição'),
                     ])
                     ->compact()
                     ->id('estate-tab-section'),

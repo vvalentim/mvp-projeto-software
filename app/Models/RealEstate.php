@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Casts\LocaleDecimal;
 use App\Casts\LocaleZipCode;
+use App\Enums\RealEstateTypes;
 use App\Models\Contracts\IsSearchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,7 @@ class RealEstate extends Model implements IsSearchable
     ];
 
     protected $casts = [
+        'type' => RealEstateTypes::class,
         'price' => LocaleDecimal::class,
         'tax_iptu' => LocaleDecimal::class,
         'tax_condominium' => LocaleDecimal::class,
