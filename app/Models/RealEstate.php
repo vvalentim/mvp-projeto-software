@@ -2,51 +2,39 @@
 
 namespace App\Models;
 
+use App\Casts\LocaleDecimal;
+use App\Casts\LocaleZipCode;
 use App\Models\Contracts\IsSearchable;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Str;
-use NumberFormatter;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RealEstate extends Model implements IsSearchable
 {
     use HasFactory;
 
+    protected $guarded = [
+        'id',
+    ];
+
+    protected $casts = [
+        'price' => LocaleDecimal::class,
+        'tax_iptu' => LocaleDecimal::class,
+        'tax_condominium' => LocaleDecimal::class,
+        'area_total' => LocaleDecimal::class,
+        'area_built' => LocaleDecimal::class,
+        'zip_code' => LocaleZipCode::class,
+    ];
+
+    public function estateOwners(): HasMany
+    {
+        return $this->hasMany(EstateOwner::class);
+    }
+
     public function owners(): BelongsToMany
     {
-        return $this->belongsToMany(Customer::class, table: 'estate_owner');
-    }
-
-    protected function formatCep(string $cep)
-    {
-        return Str::substrReplace($cep, '-', 5, 0);
-    }
-
-    protected function formatCurrency(string $price)
-    {
-
-        $format = numfmt_create('pt_BR', NumberFormatter::DECIMAL);
-        $format->setAttribute(NumberFormatter::FRACTION_DIGITS, 2);
-
-        return numfmt_format_currency($format, $price, 'BRL');
-    }
-
-    protected function zipCode(): Attribute
-    {
-        return Attribute::make(
-            get: fn (string $value) => $this->formatCep($value),
-            set: fn (string $value) => preg_replace('/\D/', '', $value)
-        );
-    }
-
-    protected function price(): Attribute
-    {
-        return Attribute::make(
-            get: fn (string $value) => $this->formatCurrency($value),
-            set: fn (string $value) => preg_replace('/\D/', '', $value)
-        );
+        return $this->belongsToMany(Customer::class, table: 'estate_owners')->withTimestamps();
     }
 
     public function getSearchLabel(): string

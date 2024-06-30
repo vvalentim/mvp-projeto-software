@@ -21,7 +21,7 @@ class Customer extends Model
 
     public function estates(): BelongsToMany
     {
-        return $this->belongsToMany(RealEstate::class, table: 'estate_owner');
+        return $this->belongsToMany(RealEstate::class, table: 'estate_owners');
     }
 
     public function person(): BelongsTo
